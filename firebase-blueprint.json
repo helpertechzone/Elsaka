@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "Order": {
+      "title": "Order",
+      "description": "A restaurant order placed by a customer.",
+      "type": "object",
+      "properties": {
+        "tableNumber": {
+          "type": "string",
+          "description": "The table number where the order was placed."
+        },
+        "items": {
+          "type": "array",
+          "description": "List of items ordered."
+        },
+        "totalPrice": {
+          "type": "number",
+          "description": "Total price of the order."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "preparing", "delivered", "cancelled"],
+          "description": "Current status of the order."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the order was created."
+        },
+        "language": {
+          "type": "string",
+          "enum": ["ar", "en"],
+          "description": "Language used when placing the order."
+        }
+      },
+      "required": ["tableNumber", "items", "totalPrice", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Collection of restaurant orders."
+    }
+  }
+}

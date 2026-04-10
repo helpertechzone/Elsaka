@@ -1,0 +1,5 @@
+{
+  "name": "El Saka Restaurant Ordering System",
+  "description": "A bilingual (Arabic/English) mobile-first ordering system for El Saka Restaurant with real-time kitchen dashboard.",
+  "requestFramePermissions": ["camera"]
+}

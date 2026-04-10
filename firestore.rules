@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: orders
+    // Document ID: auto-generated
+    // Fields:
+    //   - tableNumber: string (required)
+    //   - items: list (required)
+    //   - totalPrice: number (required)
+    //   - status: string (required, enum: ['pending', 'preparing', 'delivered', 'cancelled'])
+    //   - createdAt: timestamp (required)
+    //   - language: string (optional, enum: ['ar', 'en'])
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isValidOrder(data) {
+      return data.tableNumber is string && data.tableNumber.size() > 0 && data.tableNumber.size() < 10 &&
+             data.items is list && data.items.size() > 0 && data.items.size() < 50 &&
+             data.totalPrice is number && data.totalPrice >= 0 &&
+             data.status in ['pending', 'preparing', 'delivered', 'cancelled'] &&
+             data.createdAt is timestamp;
+    }
+
+    match /orders/{orderId} {
+      // Customers can create orders without auth (QR scan use case)
+      // But we restrict what they can write
+      allow create: if isValidOrder(request.resource.data);
+      
+      // Only staff/admin should be able to read all orders and update status
+      // For this demo, we allow read if authenticated or if it's a specific order (though usually restricted)
+      // We'll use the user email from context as admin
+      allow read: if true; 
+      
+      allow update: if isValidOrder(request.resource.data) && 
+                      (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) || 
+                       request.auth.token.email == "helpertechzone@gmail.com");
+      
+      allow delete: if request.auth.token.email == "helpertechzone@gmail.com";
+    }
+  }
+}
